@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+    </script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  
+<form id="myForm" action="" method="post">
+	<table align="center" cellpadding="3" cellspacing="3" border="2" bgcolor="powderblue">
+		<!-- <tr><th colspan="4"align="right"><input type="button" name="btn" value="AddTag"></th>
+      </tr>-->
+     <!-- <tr><th colspan="4" align="right"> <button class="btn btn-success btn-lg" data-toggle="modal" data-target="#modalForm">AddTag</button></th></tr>
+ --><div class="table-responsive">
+    <div align="center">
+     <button type="button" name="add" id="add" data-toggle="modal" data-target="#add_data_Modal" class="btn btn-primary">AddTag</button>
+    </div>
+
+     <tr>
+      <th>Tag Id</th>
+			<th>Tag Name</th>
+			<th>Update</th>
+			<th>Status</th>
+		</tr>
+		 <?php
+  $i=1;
+  foreach($data as $row)  
+  {
+      echo "<tr>";
+      echo "<td>".$i."</td>";
+      echo "<td>".$row->tag_name."</td>";
+    //   echo"  <td> <button type='button' class='close' data-dismiss='modal'>&times;</button>
+    // <h4 class='modal-title'>Update Tag</h4></td>";
+   
+      echo "<td><a data-toggle='modal' data-target='#update_data_Modal' class='btn btn-primary' id='update' href='updatedata/$row->tag_id'>Update</a></td>";
+      echo "<td><a href='#' class='status_checks' data-status =".$row->status." 
+      data-id=".$row->tag_id." >";
+      if($row->status =='1'){ echo 'Deactive';}else{echo 'Active';}
+      echo "</a></td>";
+      echo "</tr>";
+       $i++;
+      }
+       ?>
+
+	</table>
+	
+
+<div id="add_data_Modal" class="modal fade">
+ <div class="modal-dialog">
+  <div class="modal-content">
+   <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Add TAg</h4>
+   </div>
+   <div class="modal-body">
+     <label>Tag Name</label>
+     <input type="text" name="name" id="name" class="form-control" />
+     <br />
+     <input type="submit" name="Add" id="insert" value="Insert" class="btn btn-primary" />
+  
+   </div>
+   <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+
+<div id="update_data_Modal" class="modal fade">
+ <div class="modal-dialog">
+  <div class="modal-content">
+   <div class="modal-header">
+   <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Update Tag</h4>
+    </div>
+   <div class="modal-body">
+    <form method="post" id="updateform">
+     <label>Update TAG</label> 
+     <input type="text" name="tag_name" id="tag_name" class="form-control" />
+     <br />
+     <input type="submit" name="update" id="update" value="Update" class="btn btn-primary" />
+    </form>
+   </div>
+   <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+   </div>
+  </div>
+ </div>
+</div>
+</form>
+</body>
+
+
+
+<script type="text/javascript">
+  $('#update').click(function(){
+      var url = $('#myForm').attr('action');
+      var data = $('#myForm').serialize();
+      //validate form
+      var tag_name = $('input[name=tag_name]');
+      var result = '';
+     
+      
+        $.ajax({
+          type: 'ajax',
+          method: 'post',
+          url: url,
+          data: data,
+          async: false,
+          dataType: 'json',
+          success: function(response){
+            if(response.success){
+              $('#update_data_Modal').modal('hide');
+              $('#myForm')[0].reset();
+              if(response.type=='add'){
+                var type = 'added'
+              }else if(response.type=='update'){
+                var type ="updated"
+              }
+              $('.alert-success').html('tag '+type+' successfully').fadeIn().delay(4000).fadeOut('slow');
+              showAllEmployee();
+            }else{
+              alert('Error');
+            }
+          },
+          error: function(){
+            alert('Could not add data');
+          }
+        });
+      }
+  
+
+    
+  $(document).on('click','.status_checks',function()
+ { 
+    var status  =  $(this).attr("data-status");
+    var id      =  $(this).attr("data-id");
+    var $str    =  'Deactivate';
+    status      =  (status == 1 ? 0 : 1);
+    var msg = (status=='0')? 'Deactivate' : 'Active'; 
+
+if(confirm("Are you sure to "+ msg))
+{ 
+    url = "<?php echo base_url('Tag_controller/').'update_status'; ?>"; 
+        $.ajax({
+          type:"POST",
+          url: url, 
+          data: {"id":id,"status":status}, 
+          success: function(data) { 
+          location.reload();
+    } 
+  });
+ }  
+ });
+</script> 
+
+</html>
